@@ -290,6 +290,35 @@ h1, h2, h3, h4 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; lett
 .plan .item .body .h { font-size: 15px; font-weight: 500; }
 .plan .item .body .s { color: var(--muted); font-size: 13px; margin-top: 2px; }
 
+/* ---------- diagrams ---------- */
+.diagram {
+    border: 1px solid var(--line-2);
+    border-radius: 12px;
+    padding: 20px 22px 8px;
+    background: linear-gradient(165deg, #151b25, var(--panel));
+    box-shadow: 0 14px 30px -18px rgba(0,0,0,.6);
+    margin-bottom: 22px;
+}
+.diagram-label {
+    color: var(--accent); font-size: 12px; margin-bottom: 6px;
+    font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.02em;
+}
+.diagram svg { display: block; overflow: visible; }
+.edge-hot { stroke-dasharray: 7 5; animation: dash 0.9s linear infinite; }
+@keyframes dash { to { stroke-dashoffset: -24; } }
+.pulse-ring {
+    animation: ringpulse 1.7s ease-out infinite;
+    transform-box: fill-box; transform-origin: center;
+}
+@keyframes ringpulse {
+    0% { opacity: .55; transform: scale(1); }
+    100% { opacity: 0; transform: scale(2.6); }
+}
+
+/* ---------- hero (command center only) ---------- */
+.stage-h.hero { font-size: 40px; margin-bottom: 10px; }
+.stage-p.hero { font-size: 16px; margin-bottom: 30px; }
+
 /* ---------- buttons ---------- */
 .stButton > button {
     font-family: 'IBM Plex Sans', sans-serif;
@@ -338,20 +367,27 @@ st.markdown(CSS, unsafe_allow_html=True)
 stage = st.session_state.stage
 incident_live = 1 <= stage <= 5 and not st.session_state.deployed
 
-ICONS = {
-    "check": '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    "alert": '<svg viewBox="0 0 16 16" fill="none"><path d="M8 1.6L15 14H1L8 1.6z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 6v3.4M8 11.6v.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
-    "dot": '<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.4"/></svg>',
-    "code": '<svg viewBox="0 0 16 16" fill="none"><path d="M5.5 4L1.5 8l4 4M10.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    "log": '<svg viewBox="0 0 16 16" fill="none"><path d="M2 3.5h12M2 8h12M2 12.5h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
-    "pulse": '<svg viewBox="0 0 16 16" fill="none"><path d="M1 8.5h3l1.5-5 3 9 1.5-4H15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    "nodes": '<svg viewBox="0 0 16 16" fill="none"><circle cx="3" cy="4" r="1.8" stroke="currentColor" stroke-width="1.3"/><circle cx="13" cy="4" r="1.8" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="12.5" r="1.8" stroke="currentColor" stroke-width="1.3"/><path d="M4.6 5l2.6 6M11.4 5l-2.6 6" stroke="currentColor" stroke-width="1.2"/></svg>',
-    "shield": '<svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5l5.5 2V8c0 4-2.4 5.8-5.5 6.5C4.9 13.8 2.5 12 2.5 8V3.5l5.5-2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
-    "test": '<svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 8.2l2 2 4-4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    "bolt": '<svg viewBox="0 0 16 16" fill="none"><path d="M8.5 1.5L3 9h4l-1 5.5L13 7H9l-0.5-5.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
+ICON_PATHS = {
+    "check": '<path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',
+    "alert": '<path d="M8 1.6L15 14H1L8 1.6z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 6v3.4M8 11.6v.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
+    "dot": '<circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.4"/>',
+    "code": '<path d="M5.5 4L1.5 8l4 4M10.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>',
+    "log": '<path d="M2 3.5h12M2 8h12M2 12.5h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>',
+    "pulse": '<path d="M1 8.5h3l1.5-5 3 9 1.5-4H15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>',
+    "nodes": '<circle cx="3" cy="4" r="1.8" stroke="currentColor" stroke-width="1.3"/><circle cx="13" cy="4" r="1.8" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="12.5" r="1.8" stroke="currentColor" stroke-width="1.3"/><path d="M4.6 5l2.6 6M11.4 5l-2.6 6" stroke="currentColor" stroke-width="1.2"/>',
+    "shield": '<path d="M8 1.5l5.5 2V8c0 4-2.4 5.8-5.5 6.5C4.9 13.8 2.5 12 2.5 8V3.5l5.5-2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>',
+    "test": '<rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 8.2l2 2 4-4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>',
+    "bolt": '<path d="M8.5 1.5L3 9h4l-1 5.5L13 7H9l-0.5-5.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>',
 }
+ICONS = {k: f'<svg viewBox="0 0 16 16" fill="none">{v}</svg>' for k, v in ICON_PATHS.items()}
 
 CHECK_TICK = '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.3l3 3 7-7" stroke="#221403" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+
+# palette mirrors the CSS custom properties, for use inside generated SVG
+C_INK, C_PANEL, C_LINE, C_LINE2 = "#0a0d12", "#12161e", "#262d3a", "#333c4c"
+C_TEXT, C_MUTED = "#edf0f4", "#8991a0"
+C_ACCENT, C_ACCENT2 = "#e2a23f", "#7d97b3"
+C_GOOD, C_BAD, C_WARN = "#5cbf8e", "#e25b52", "#d9b04a"
 
 GLYPH = (
     '<svg class="glyph" width="30" height="30" viewBox="0 0 30 30" fill="none">'
@@ -360,6 +396,136 @@ GLYPH = (
     'stroke-linecap="round" stroke-linejoin="round" fill="none"/>'
     '</svg>'
 )
+
+
+def diagram(label, inner_svg, viewbox, height=220):
+    return (
+        f'<div class="diagram"><div class="diagram-label">{label}</div>'
+        f'<svg viewBox="{viewbox}" style="width:100%;height:{height}px" '
+        f'preserveAspectRatio="xMidYMid meet">{inner_svg}</svg></div>'
+    )
+
+
+def _node_box(cx, cy, label, sub, tone, w=118, h=48):
+    stroke = {"neutral": C_LINE2, "hot": C_BAD, "good": C_GOOD}[tone]
+    dot = {"neutral": C_GOOD, "hot": C_BAD, "good": C_GOOD}[tone]
+    ring = f'<circle class="pulse-ring" cx="{cx - w/2 + 12}" cy="{cy - h/2 + 12}" r="4" fill="{dot}"/>' if tone == "hot" else ""
+    return (
+        f'<g>'
+        f'<rect x="{cx - w/2}" y="{cy - h/2}" width="{w}" height="{h}" rx="9" '
+        f'fill="{C_PANEL}" stroke="{stroke}" stroke-width="1.5"/>'
+        f'<circle cx="{cx - w/2 + 12}" cy="{cy - h/2 + 12}" r="3.4" fill="{dot}"/>{ring}'
+        f'<text x="{cx}" y="{cy - 2}" text-anchor="middle" fill="{C_TEXT}" '
+        f'font-family="IBM Plex Sans" font-size="12.5" font-weight="600">{label}</text>'
+        f'<text x="{cx}" y="{cy + 14}" text-anchor="middle" fill="{C_MUTED}" '
+        f'font-family="IBM Plex Mono" font-size="10">{sub}</text>'
+        f'</g>'
+    )
+
+
+def _edge(x1, y1, x2, y2, hot=False):
+    cls = 'class="edge-hot"' if hot else ""
+    color = C_BAD if hot else C_LINE2
+    return f'<path d="M{x1} {y1} L{x2} {y2}" stroke="{color}" stroke-width="1.6" {cls} fill="none"/>'
+
+
+def svg_topology(mode):
+    """mode: 'healthy' | 'incident' | 'recovered'"""
+    hot = mode == "incident"
+    api_tone = "hot" if hot else "good"
+    db_tone = "hot" if hot else "good"
+    ord_tone = "hot" if hot else "good"
+    edges = (
+        _edge(98, 100, 250, 100) +
+        _edge(308, 100, 410, 100, hot=hot) +
+        _edge(468, 100, 560, 66, hot=hot) +
+        _edge(468, 100, 560, 140, hot=hot)
+    )
+    nodes = (
+        _node_box(58, 100, "Client", "browser", "neutral", w=76) +
+        _node_box(220, 100, "API Gateway", "edge", "neutral") +
+        _node_box(410, 100, "Payment API", "payments-svc", api_tone) +
+        _node_box(596, 66, "Database", "conn pool", db_tone, w=104) +
+        _node_box(596, 140, "Order Service", "checkout", ord_tone)
+    )
+    return diagram("System map", edges + nodes, "0 0 656 200", height=190)
+
+
+def svg_constellation(done):
+    import math
+    cx, cy, r = 260, 172, 118
+    agents = [
+        ("Code", "code"), ("Log", "log"), ("Telemetry", "pulse"),
+        ("Dependency", "nodes"), ("Security", "shield"), ("Test", "test"),
+    ]
+    spoke_color = C_GOOD if done else C_LINE2
+    spoke_cls = "" if done else 'class="edge-hot"'
+    node_stroke = C_GOOD if done else C_LINE2
+    icon_color = C_GOOD if done else C_MUTED
+    spokes, nodes = "", ""
+    for i, (name, icon) in enumerate(agents):
+        ang = math.radians(-90 + i * 60)
+        x, y = cx + r * math.cos(ang), cy + r * math.sin(ang)
+        spokes += f'<path d="M{cx} {cy} L{x:.1f} {y:.1f}" stroke="{spoke_color}" stroke-width="1.4" {spoke_cls} fill="none"/>'
+        nodes += (
+            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="27" fill="{C_PANEL}" stroke="{node_stroke}" stroke-width="1.6"/>'
+            f'<svg x="{x-9:.1f}" y="{y-9:.1f}" width="18" height="18" viewBox="0 0 16 16" fill="none" '
+            f'color="{icon_color}">{ICON_PATHS[icon]}</svg>'
+            f'<text x="{x:.1f}" y="{y+42:.1f}" text-anchor="middle" fill="{C_MUTED if not done else C_TEXT}" '
+            f'font-family="IBM Plex Sans" font-size="11" font-weight="500">{name}</text>'
+        )
+    hub_stroke = C_ACCENT if not done else C_GOOD
+    hub_ring = (
+        f'<circle class="pulse-ring" cx="{cx}" cy="{cy}" r="34" fill="none" stroke="{C_ACCENT}" stroke-width="1.5"/>'
+        if not done else ""
+    )
+    hub_check = f'<path d="M3 8.3l3 3 7-7" stroke="{C_INK}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+    hub = (
+        f'<circle cx="{cx}" cy="{cy}" r="34" fill="{C_ACCENT if not done else C_GOOD}" '
+        f'stroke="{hub_stroke}" stroke-width="1.6"/>{hub_ring}'
+        + (f'<svg x="{cx-9}" y="{cy-9}" width="18" height="18" viewBox="0 0 16 16">{hub_check}</svg>'
+           if done else
+           f'<text x="{cx}" y="{cy+5}" text-anchor="middle" fill="{C_INK}" font-family="IBM Plex Mono" '
+           f'font-size="12" font-weight="700">BOB</text>')
+    )
+    return diagram("Agent network", spokes + nodes + hub, "0 0 520 340", height=260)
+
+
+def svg_capacity():
+    rows = [
+        ("Configured after deploy", 100, 380, C_BAD, "100 total"),
+        ("Peak checkout demand", 340, 380, C_ACCENT2, "340 concurrent"),
+    ]
+    bars = ""
+    y = 30
+    for label, value, scale, color, tag in rows:
+        pct = value / scale * 100
+        bars += (
+            f'<text x="0" y="{y}" fill="{C_MUTED}" font-family="IBM Plex Sans" font-size="12.5">{label}</text>'
+            f'<rect x="0" y="{y+10}" width="600" height="16" rx="8" fill="{C_LINE}"/>'
+            f'<rect x="0" y="{y+10}" width="{pct*6:.0f}" height="16" rx="8" fill="{color}"/>'
+            f'<text x="{pct*6+12:.0f}" y="{y+22}" fill="{C_TEXT}" font-family="IBM Plex Mono" font-size="12">{tag}</text>'
+        )
+        y += 58
+    return diagram("Capacity vs demand", bars, "0 0 640 120", height=130)
+
+
+def svg_recovery():
+    pts = "20,134 90,132 140,30 230,28 340,26 420,24 480,70 540,118 600,136 620,134"
+    area = f"20,150 {pts} 620,150"
+    return diagram(
+        "Recovery timeline",
+        f'<defs><linearGradient id="rg" x1="0" y1="0" x2="0" y2="1">'
+        f'<stop offset="0%" stop-color="{C_ACCENT2}" stop-opacity=".35"/>'
+        f'<stop offset="100%" stop-color="{C_ACCENT2}" stop-opacity="0"/></linearGradient></defs>'
+        f'<polygon points="{area}" fill="url(#rg)"/>'
+        f'<polyline points="{pts}" fill="none" stroke="{C_ACCENT2}" stroke-width="2"/>'
+        f'<circle cx="140" cy="30" r="5" fill="{C_BAD}"/>'
+        f'<text x="140" y="16" text-anchor="middle" fill="{C_BAD}" font-family="IBM Plex Mono" font-size="11">Detected</text>'
+        f'<circle cx="620" cy="134" r="5" fill="{C_GOOD}"/>'
+        f'<text x="620" y="152" text-anchor="end" fill="{C_GOOD}" font-family="IBM Plex Mono" font-size="11">Recovered · 6m12s</text>',
+        "0 0 640 160", height=160,
+    )
 
 st.markdown(
     f'<div class="masthead">{GLYPH}'
@@ -397,8 +563,9 @@ rail.append("</div>")
 st.markdown("".join(rail), unsafe_allow_html=True)
 
 
-def heading(title, blurb):
-    st.markdown(f'<div class="stage-h">{title}</div><div class="stage-p">{blurb}</div>',
+def heading(title, blurb, hero=False):
+    cls = " hero" if hero else ""
+    st.markdown(f'<div class="stage-h{cls}">{title}</div><div class="stage-p{cls}">{blurb}</div>',
                 unsafe_allow_html=True)
 
 
@@ -426,8 +593,10 @@ next_label, next_ready, next_action = "Continue", True, None
 
 # 00 — Command center -------------------------------------------------------
 if stage == 0:
-    heading("Everything is quiet", "This is the steady state BOB watches. Continue to trigger a "
-                                   "production incident and walk the rescue end to end.")
+    heading("Everything is quiet", "This is the steady state BOB watches around the clock. Continue "
+                                   "to trigger a production incident and walk the rescue end to end.",
+            hero=True)
+    st.markdown(svg_topology("healthy"), unsafe_allow_html=True)
     readouts([
         ("Error rate", "0.4%", "good", "within 1% budget"),
         ("API latency p95", "210 ms", "info", "target 400 ms"),
@@ -441,6 +610,7 @@ elif stage == 1:
     heading("BOB opened an incident", "Error rate crossed the payments budget within 40 seconds of a "
                                       "configuration deploy. BOB paged itself and captured a snapshot "
                                       "before anything was touched.")
+    st.markdown(svg_topology("incident"), unsafe_allow_html=True)
     readouts([
         ("Error rate", "38%", "bad", "was 0.4% two minutes ago"),
         ("API latency p95", "4.8 s", "bad", "12× baseline"),
@@ -460,6 +630,7 @@ elif stage == 1:
 elif stage == 2:
     heading("Six agents, one sweep", "Each agent owns a slice of the evidence and reports into a shared "
                                      "graph, so findings are cross-checked instead of guessed.")
+    st.markdown(svg_constellation(st.session_state.investigated), unsafe_allow_html=True)
     agents = [
         ("Code", "Diffs the last deploy against the running config", "14 changes read", "code"),
         ("Log", "Clusters error signatures and orders the failure", "2.1M lines scanned", "log"),
@@ -518,6 +689,7 @@ elif stage == 3:
         'that waited on a free connection until it timed out.</p></div>',
         unsafe_allow_html=True,
     )
+    st.markdown(svg_capacity(), unsafe_allow_html=True)
     chain = [
         ("Config deploy 8f2c1a", "db.pool.max lowered from 100 to 10 per instance"),
         ("Pool ceiling drops 10×", "Effective capacity falls to 100 connections fleet-wide"),
@@ -649,6 +821,8 @@ elif stage == 6:
 
     heading("Recovered and verified", "BOB watched every signal back to baseline before closing "
                                       "the incident.")
+    st.markdown(svg_topology("recovered"), unsafe_allow_html=True)
+    st.markdown(svg_recovery(), unsafe_allow_html=True)
     readouts([
         ("Error rate", "0.3%", "good", "down from 38%"),
         ("API latency p95", "180 ms", "good", "down from 4.8 s"),
