@@ -150,24 +150,42 @@ h1, h2, h3, h4 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; lett
 }
 
 /* ---------- progress rail ---------- */
-.rail { display: flex; gap: 5px; margin-bottom: 34px; }
-.rail .node { flex: 1; min-width: 0; }
-.rail .bar {
-    height: 2px; background: var(--line); margin-bottom: 10px;
+.rail { display: flex; margin-bottom: 38px; }
+.rail .node {
+    flex: 1; min-width: 0; position: relative;
+    display: flex; flex-direction: column; align-items: center;
+    padding-top: 8px;
 }
-.rail .node.done .bar { background: var(--accent-2); }
-.rail .node.now  .bar { background: var(--accent); height: 3px; }
-.rail .n {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10.5px; color: #4c5361; margin-right: 6px;
+.rail .track {
+    position: absolute; top: 15px; left: -50%; width: 100%; height: 2px;
+    background: var(--line); z-index: 0;
+}
+.rail .node:first-child .track { display: none; }
+.rail .node.done .track, .rail .node.now .track { background: var(--accent-2); }
+.rail .circle {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid var(--line-2); background: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 1;
+}
+.rail .circle svg { width: 8px; height: 8px; }
+.rail .node.now .circle {
+    border-color: var(--accent); background: var(--accent);
+    box-shadow: 0 0 0 4px rgba(226, 162, 63, .2);
+}
+.rail .node.done .circle { border-color: var(--accent-2); background: var(--accent-2); }
+.rail .label { margin-top: 9px; text-align: center; line-height: 1.4; }
+.rail .idx {
+    display: block; font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; color: #4c5361;
 }
 .rail .t {
-    font-size: 12px; color: #5b6373; white-space: nowrap;
+    font-size: 11.5px; color: #5b6373; white-space: nowrap;
     overflow: hidden; text-overflow: ellipsis;
 }
-.rail .node.done .t, .rail .node.done .n { color: #838da0; }
+.rail .node.done .t, .rail .node.done .idx { color: #838da0; }
 .rail .node.now .t { color: var(--text); font-weight: 600; }
-.rail .node.now .n { color: var(--accent); }
+.rail .node.now .idx { color: var(--accent); }
 
 /* ---------- stage heading ---------- */
 .stage-h { margin-bottom: 6px; font-size: 28px; }
@@ -178,9 +196,10 @@ h1, h2, h3, h4 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; lett
 .read {
     flex: 1 1 180px;
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: 9px;
     padding: 16px 18px;
-    background: var(--panel);
+    background: linear-gradient(165deg, #151b25, var(--panel));
+    box-shadow: 0 1px 0 rgba(255,255,255,.02) inset, 0 6px 14px -10px rgba(0,0,0,.6);
 }
 .read .k {
     color: var(--muted); font-size: 11.5px; margin-bottom: 9px;
@@ -198,16 +217,20 @@ h1, h2, h3, h4 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; lett
 
 /* ---------- rows ---------- */
 .row {
-    display: flex; align-items: center; gap: 12px;
+    display: flex; align-items: center; gap: 13px;
     border: 1px solid var(--line);
     border-left: 3px solid var(--line-2);
-    border-radius: 8px;
+    border-radius: 9px;
     padding: 13px 16px;
-    background: var(--panel);
+    background: linear-gradient(165deg, #141a23, var(--panel));
+    box-shadow: 0 6px 14px -12px rgba(0,0,0,.6);
     margin-bottom: 8px;
 }
 .row.ok { border-left-color: var(--good); }
 .row.hot { border-left-color: var(--bad); }
+.row .ic { flex-shrink: 0; width: 18px; height: 18px; color: var(--muted); }
+.row.ok .ic { color: var(--good); }
+.row.hot .ic { color: var(--bad); }
 .row .name { font-weight: 600; font-size: 14.5px; }
 .row .desc { color: var(--muted); font-size: 13px; margin-top: 1px; }
 .row .state {
@@ -215,6 +238,8 @@ h1, h2, h3, h4 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; lett
     font-family: 'IBM Plex Mono', monospace;
 }
 .row .state.idle { color: #565f6e; }
+.row .state.bad { color: var(--bad); }
+.row .state.warn { color: var(--warn); }
 
 /* ---------- failure chain ---------- */
 .chain { border-left: 2px solid var(--line-2); margin-left: 9px; padding-left: 22px; }
@@ -234,7 +259,8 @@ h1, h2, h3, h4 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; lett
     border: 1px solid var(--line-2);
     border-radius: 10px;
     padding: 24px 26px;
-    background: var(--panel-2);
+    background: linear-gradient(155deg, #1a212d, var(--panel-2));
+    box-shadow: 0 14px 30px -18px rgba(0,0,0,.7);
     margin-bottom: 22px;
 }
 .verdict::before, .verdict::after {
@@ -312,6 +338,21 @@ st.markdown(CSS, unsafe_allow_html=True)
 stage = st.session_state.stage
 incident_live = 1 <= stage <= 5 and not st.session_state.deployed
 
+ICONS = {
+    "check": '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    "alert": '<svg viewBox="0 0 16 16" fill="none"><path d="M8 1.6L15 14H1L8 1.6z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 6v3.4M8 11.6v.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+    "dot": '<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.4"/></svg>',
+    "code": '<svg viewBox="0 0 16 16" fill="none"><path d="M5.5 4L1.5 8l4 4M10.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    "log": '<svg viewBox="0 0 16 16" fill="none"><path d="M2 3.5h12M2 8h12M2 12.5h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+    "pulse": '<svg viewBox="0 0 16 16" fill="none"><path d="M1 8.5h3l1.5-5 3 9 1.5-4H15" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    "nodes": '<svg viewBox="0 0 16 16" fill="none"><circle cx="3" cy="4" r="1.8" stroke="currentColor" stroke-width="1.3"/><circle cx="13" cy="4" r="1.8" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="12.5" r="1.8" stroke="currentColor" stroke-width="1.3"/><path d="M4.6 5l2.6 6M11.4 5l-2.6 6" stroke="currentColor" stroke-width="1.2"/></svg>',
+    "shield": '<svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5l5.5 2V8c0 4-2.4 5.8-5.5 6.5C4.9 13.8 2.5 12 2.5 8V3.5l5.5-2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
+    "test": '<svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 8.2l2 2 4-4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    "bolt": '<svg viewBox="0 0 16 16" fill="none"><path d="M8.5 1.5L3 9h4l-1 5.5L13 7H9l-0.5-5.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
+}
+
+CHECK_TICK = '<svg viewBox="0 0 16 16" fill="none"><path d="M3 8.3l3 3 7-7" stroke="#221403" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+
 GLYPH = (
     '<svg class="glyph" width="30" height="30" viewBox="0 0 30 30" fill="none">'
     '<circle cx="15" cy="15" r="13" stroke="#333c4c" stroke-width="1.4"/>'
@@ -345,9 +386,12 @@ st.markdown(
 rail = ['<div class="rail">']
 for i, (name, _) in enumerate(STAGES):
     cls = "done" if i < stage else ("now" if i == stage else "")
+    mark = CHECK_TICK.replace("#221403", "#0a0d12") if cls == "done" else ""
     rail.append(
-        f'<div class="node {cls}"><div class="bar"></div>'
-        f'<span class="n">{i + 1:02d}</span><span class="t">{name}</span></div>'
+        f'<div class="node {cls}"><div class="track"></div>'
+        f'<div class="circle">{mark}</div>'
+        f'<div class="label"><span class="idx">{i + 1:02d}</span>'
+        f'<span class="t">{name}</span></div></div>'
     )
 rail.append("</div>")
 st.markdown("".join(rail), unsafe_allow_html=True)
@@ -365,6 +409,14 @@ def readouts(items):
         for k, v, tone, d in items
     )
     st.markdown(f'<div class="grid">{cards}</div>', unsafe_allow_html=True)
+
+
+def row(name, desc, state="", cls="", icon="dot", state_cls=""):
+    return (
+        f'<div class="row {cls}"><span class="ic">{ICONS[icon]}</span>'
+        f'<div><div class="name">{name}</div><div class="desc">{desc}</div></div>'
+        f'<div class="state {state_cls}">{state}</div></div>'
+    )
 
 
 # --------------------------------------------------------------------------
@@ -396,12 +448,10 @@ elif stage == 1:
         ("Failed payments", "1,204", "bad", "and climbing"),
     ])
     st.markdown(
-        '<div class="row hot"><div><div class="name">Payment API returning 503</div>'
-        '<div class="desc">Upstream checkout and order services now timing out</div></div>'
-        '<div class="state" style="color:var(--bad)">firing</div></div>'
-        '<div class="row hot"><div><div class="name">Deploy 8f2c1a landed 00:40 before first error</div>'
-        '<div class="desc">Config-only change to payments-svc, no code diff</div></div>'
-        '<div class="state" style="color:var(--warn)">suspect</div></div>',
+        row("Payment API returning 503", "Upstream checkout and order services now timing out",
+            "firing", cls="hot", icon="alert", state_cls="bad") +
+        row("Deploy 8f2c1a landed 00:40 before first error", "Config-only change to payments-svc, no code diff",
+            "suspect", cls="hot", icon="bolt", state_cls="warn"),
         unsafe_allow_html=True,
     )
     next_label = "Send in the agents"
@@ -411,19 +461,18 @@ elif stage == 2:
     heading("Six agents, one sweep", "Each agent owns a slice of the evidence and reports into a shared "
                                      "graph, so findings are cross-checked instead of guessed.")
     agents = [
-        ("Code", "Diffs the last deploy against the running config", "14 changes read"),
-        ("Log", "Clusters error signatures and orders the failure", "2.1M lines scanned"),
-        ("Telemetry", "Correlates latency, saturation and traffic", "340 series correlated"),
-        ("Dependency", "Maps blast radius across services", "9 services mapped"),
-        ("Security", "Rules out credential and access causes", "no anomalies"),
-        ("Test", "Assembles the validation set for any fix", "5 suites selected"),
+        ("Code", "Diffs the last deploy against the running config", "14 changes read", "code"),
+        ("Log", "Clusters error signatures and orders the failure", "2.1M lines scanned", "log"),
+        ("Telemetry", "Correlates latency, saturation and traffic", "340 series correlated", "pulse"),
+        ("Dependency", "Maps blast radius across services", "9 services mapped", "nodes"),
+        ("Security", "Rules out credential and access causes", "no anomalies", "shield"),
+        ("Test", "Assembles the validation set for any fix", "5 suites selected", "test"),
     ]
     done = st.session_state.investigated
     rows = "".join(
-        f'<div class="row {"ok" if done else ""}"><div><div class="name">{n} agent</div>'
-        f'<div class="desc">{d}</div></div>'
-        f'<div class="state {"" if done else "idle"}">{result if done else "standing by"}</div></div>'
-        for n, d, result in agents
+        row(f"{n} agent", d, result if done else "standing by",
+            cls="ok" if done else "", icon=ic, state_cls="idle" if not done else "")
+        for n, d, result, ic in agents
     )
     st.markdown(rows, unsafe_allow_html=True)
 
@@ -523,9 +572,8 @@ elif stage == 5:
 
     if not st.session_state.simulated:
         st.markdown(
-            '<div class="row"><div><div class="name">Shadow environment ready</div>'
-            '<div class="desc">Mirrors live traffic shape from the last 15 minutes</div></div>'
-            '<div class="state idle">not yet run</div></div>',
+            row("Shadow environment ready", "Mirrors live traffic shape from the last 15 minutes",
+                "not yet run", icon="pulse", state_cls="idle"),
             unsafe_allow_html=True,
         )
         next_label = "Run the simulation"
@@ -554,9 +602,8 @@ elif stage == 5:
 
         if st.session_state.approved:
             st.markdown(
-                '<div class="row ok"><div><div class="name">Approved for production</div>'
-                '<div class="desc">Signed off by the on-call reviewer</div></div>'
-                '<div class="state">ready to deploy</div></div>',
+                row("Approved for production", "Signed off by the on-call reviewer",
+                    "ready to deploy", cls="ok", icon="check"),
                 unsafe_allow_html=True,
             )
             next_label = "Deploy the rescue"
@@ -569,10 +616,10 @@ elif stage == 5:
                 st.session_state.note = "reject"
             if st.session_state.note == "reject":
                 st.markdown(
-                    '<div class="row hot"><div><div class="name">Rescue rejected</div>'
-                    '<div class="desc">Nothing was changed in production. The incident stays '
-                    'open and BOB keeps monitoring.</div></div>'
-                    '<div class="state" style="color:var(--bad)">no action taken</div></div>',
+                    row("Rescue rejected",
+                        "Nothing was changed in production. The incident stays open and "
+                        "BOB keeps monitoring.",
+                        "no action taken", cls="hot", icon="alert", state_cls="bad"),
                     unsafe_allow_html=True,
                 )
             next_label = "Deploy the rescue"
@@ -617,8 +664,7 @@ elif stage == 6:
         ("Regression watch", "Auto-rollback armed for 30 minutes"),
     ]:
         st.markdown(
-            f'<div class="row ok"><div><div class="name">{name}</div>'
-            f'<div class="desc">{detail}</div></div><div class="state">verified</div></div>',
+            row(name, detail, "verified", cls="ok", icon="check"),
             unsafe_allow_html=True,
         )
 
