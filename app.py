@@ -8,16 +8,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed",
 )
-hide_streamlit_style = """
-    <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    .viewerBadge_container__1QSob {display: none !style;}
-    div[data-testid="stToolbar"] {visibility: hidden; display: none;}
-    </style>
-"""
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 # --------------------------------------------------------------------------
 # Flow definition — the whole app is one linear sequence of stages.
 # --------------------------------------------------------------------------
