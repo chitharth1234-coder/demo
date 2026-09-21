@@ -4,7 +4,7 @@ import streamlit as st
 
 st.set_page_config(
     page_title="BOB AI Rescue",
-    page_icon="🚨",
+    page_icon="◈",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -52,19 +52,21 @@ def restart():
 # --------------------------------------------------------------------------
 CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
 
 :root {
-    --ink:      #060f1a;
-    --panel:    #0c1a2b;
-    --panel-2:  #0f2136;
-    --line:     #1b3450;
-    --text:     #e6f0fb;
-    --muted:    #8ba4bf;
-    --cyan:     #56d6ff;
-    --coral:    #ff6b7d;
-    --mint:     #4fe0a4;
-    --amber:    #ffc45c;
+    --ink:      #0a0d12;
+    --panel:    #12161e;
+    --panel-2:  #161c26;
+    --line:     #262d3a;
+    --line-2:   #333c4c;
+    --text:     #edf0f4;
+    --muted:    #8991a0;
+    --accent:   #e2a23f;
+    --accent-2: #7d97b3;
+    --good:     #5cbf8e;
+    --bad:      #e25b52;
+    --warn:     #d9b04a;
 }
 
 header[data-testid="stHeader"],
@@ -75,158 +77,189 @@ footer { display: none !important; }
 
 .stApp {
     background:
-        radial-gradient(1100px 520px at 12% -8%, #12304e 0%, transparent 62%),
-        radial-gradient(900px 480px at 92% 0%, #0d2a44 0%, transparent 58%),
+        linear-gradient(180deg, #0d1119 0%, var(--ink) 340px),
+        repeating-linear-gradient(180deg, rgba(255,255,255,.012) 0px, rgba(255,255,255,.012) 1px, transparent 1px, transparent 34px),
         var(--ink);
     color: var(--text);
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
 }
 
 .block-container {
-    max-width: 1120px;
-    padding: 2.2rem 1.4rem 4rem;
+    max-width: 1080px;
+    padding: 2.4rem 1.4rem 4rem;
 }
 
-h1, h2, h3, h4 { font-family: 'Space Grotesk', system-ui, sans-serif; letter-spacing: -0.015em; }
+h1, h2, h3, h4 { font-family: 'Fraunces', Georgia, serif; font-weight: 600; letter-spacing: -0.01em; }
 
 /* ---------- masthead ---------- */
 .masthead {
     display: flex;
-    align-items: baseline;
-    gap: 14px;
-    margin-bottom: 20px;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
 }
+.masthead .glyph { flex-shrink: 0; }
+.masthead .id { display: flex; flex-direction: column; gap: 1px; }
 .masthead .mark {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 700;
-    font-size: 26px;
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 1.15;
     color: var(--text);
 }
-.masthead .tag { color: var(--muted); font-size: 14px; }
+.masthead .tag { color: var(--muted); font-size: 13px; }
 
 /* ---------- status strip ---------- */
 .strip {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 16px 20px;
-    border-radius: 14px;
+    padding: 16px 22px;
+    border-radius: 10px;
     border: 1px solid var(--line);
-    background: linear-gradient(100deg, var(--panel), var(--panel-2));
-    margin-bottom: 26px;
+    background: var(--panel);
+    margin-bottom: 28px;
 }
+.strip::before {
+    content: '';
+    position: absolute; left: 0; top: 12px; bottom: 12px; width: 3px;
+    background: var(--good); border-radius: 0 2px 2px 0;
+}
+.strip.alert::before { background: var(--bad); }
 .strip .dot {
-    width: 11px; height: 11px; border-radius: 50%;
-    background: var(--mint);
-    box-shadow: 0 0 0 5px rgba(79, 224, 164, .14);
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--good);
+    box-shadow: 0 0 0 4px rgba(92, 191, 142, .16);
 }
-.strip.alert { border-color: rgba(255, 107, 125, .5); }
 .strip.alert .dot {
-    background: var(--coral);
-    box-shadow: 0 0 0 5px rgba(255, 107, 125, .18);
-    animation: pulse 1.6s ease-in-out infinite;
+    background: var(--bad);
+    box-shadow: 0 0 0 4px rgba(226, 91, 82, .18);
+    animation: pulse 1.7s ease-in-out infinite;
 }
 @keyframes pulse {
-    50% { box-shadow: 0 0 0 12px rgba(255, 107, 125, 0); }
+    50% { box-shadow: 0 0 0 10px rgba(226, 91, 82, 0); }
 }
-.strip .headline { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 17px; }
-.strip .sub { color: var(--muted); font-size: 14px; margin-left: auto; }
+.strip .headline { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 17px; }
+.strip .sub {
+    color: var(--muted); font-size: 12.5px; margin-left: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.01em;
+}
 
 /* ---------- progress rail ---------- */
-.rail { display: flex; gap: 6px; margin-bottom: 30px; }
+.rail { display: flex; gap: 5px; margin-bottom: 34px; }
 .rail .node { flex: 1; min-width: 0; }
 .rail .bar {
-    height: 3px; border-radius: 2px; background: #16283d; margin-bottom: 10px;
+    height: 2px; background: var(--line); margin-bottom: 10px;
 }
-.rail .node.done .bar { background: var(--mint); }
-.rail .node.now  .bar { background: var(--cyan); }
+.rail .node.done .bar { background: var(--accent-2); }
+.rail .node.now  .bar { background: var(--accent); height: 3px; }
 .rail .n {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px; color: #4d6885; margin-right: 6px;
+    font-size: 10.5px; color: #4c5361; margin-right: 6px;
 }
 .rail .t {
-    font-size: 12.5px; color: #59748f; white-space: nowrap;
+    font-size: 12px; color: #5b6373; white-space: nowrap;
     overflow: hidden; text-overflow: ellipsis;
 }
-.rail .node.done .t, .rail .node.done .n { color: #7fa0bd; }
+.rail .node.done .t, .rail .node.done .n { color: #838da0; }
 .rail .node.now .t { color: var(--text); font-weight: 600; }
-.rail .node.now .n { color: var(--cyan); }
+.rail .node.now .n { color: var(--accent); }
 
 /* ---------- stage heading ---------- */
-.stage-h { margin-bottom: 4px; font-size: 30px; font-weight: 700; }
-.stage-p { color: var(--muted); font-size: 15px; max-width: 68ch; margin-bottom: 24px; }
+.stage-h { margin-bottom: 6px; font-size: 28px; }
+.stage-p { color: var(--muted); font-size: 15px; max-width: 66ch; margin-bottom: 26px; line-height: 1.55; }
 
 /* ---------- readouts ---------- */
-.grid { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.grid { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
 .read {
     flex: 1 1 180px;
     border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 15px 17px;
+    border-radius: 8px;
+    padding: 16px 18px;
     background: var(--panel);
 }
-.read .k { color: var(--muted); font-size: 12.5px; margin-bottom: 7px; }
+.read .k {
+    color: var(--muted); font-size: 11.5px; margin-bottom: 9px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+}
 .read .v {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 23px; font-weight: 500; color: var(--text);
+    font-size: 22px; font-weight: 500; color: var(--text);
 }
-.read .d { font-size: 12px; color: var(--muted); margin-top: 5px; }
-.v.bad { color: var(--coral); }
-.v.good { color: var(--mint); }
-.v.warn { color: var(--amber); }
-.v.info { color: var(--cyan); }
+.read .d { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.v.bad { color: var(--bad); }
+.v.good { color: var(--good); }
+.v.warn { color: var(--warn); }
+.v.info { color: var(--accent-2); }
 
 /* ---------- rows ---------- */
 .row {
     display: flex; align-items: center; gap: 12px;
     border: 1px solid var(--line);
-    border-left: 3px solid #23415f;
-    border-radius: 10px;
+    border-left: 3px solid var(--line-2);
+    border-radius: 8px;
     padding: 13px 16px;
     background: var(--panel);
     margin-bottom: 8px;
 }
-.row.ok { border-left-color: var(--mint); }
-.row.hot { border-left-color: var(--coral); }
+.row.ok { border-left-color: var(--good); }
+.row.hot { border-left-color: var(--bad); }
 .row .name { font-weight: 600; font-size: 14.5px; }
-.row .desc { color: var(--muted); font-size: 13px; }
-.row .state { margin-left: auto; font-size: 13px; color: var(--mint); white-space: nowrap; }
-.row .state.idle { color: #5d7894; }
+.row .desc { color: var(--muted); font-size: 13px; margin-top: 1px; }
+.row .state {
+    margin-left: auto; font-size: 12px; color: var(--good); white-space: nowrap;
+    font-family: 'IBM Plex Mono', monospace;
+}
+.row .state.idle { color: #565f6e; }
 
 /* ---------- failure chain ---------- */
-.chain { border-left: 2px solid #23415f; margin-left: 9px; padding-left: 22px; }
+.chain { border-left: 2px solid var(--line-2); margin-left: 9px; padding-left: 22px; }
 .chain .link { position: relative; padding: 11px 0; }
 .chain .link::before {
     content: ''; position: absolute; left: -29px; top: 17px;
-    width: 12px; height: 12px; border-radius: 50%;
-    background: var(--ink); border: 2px solid #3a6083;
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--ink); border: 2px solid var(--line-2);
 }
-.chain .link:last-child::before { border-color: var(--coral); background: var(--coral); }
+.chain .link:last-child::before { border-color: var(--bad); background: var(--bad); }
 .chain .link .lt { font-size: 15px; font-weight: 500; }
 .chain .link .ld { color: var(--muted); font-size: 13px; margin-top: 2px; }
 
 /* ---------- verdict panel ---------- */
 .verdict {
-    border: 1px solid rgba(86, 214, 255, .35);
-    border-radius: 14px;
-    padding: 22px 24px;
-    background: linear-gradient(130deg, #0e2237, #10283f);
-    margin-bottom: 20px;
+    position: relative;
+    border: 1px solid var(--line-2);
+    border-radius: 10px;
+    padding: 24px 26px;
+    background: var(--panel-2);
+    margin-bottom: 22px;
 }
-.verdict .lead { color: var(--cyan); font-size: 13px; margin-bottom: 8px; }
-.verdict h3 { margin: 0 0 8px; font-size: 22px; }
-.verdict p { color: #b9cde2; font-size: 14.5px; margin: 0; max-width: 72ch; line-height: 1.6; }
+.verdict::before, .verdict::after {
+    content: ''; position: absolute; width: 14px; height: 14px;
+    border: 1.5px solid var(--accent); opacity: .8;
+}
+.verdict::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+.verdict::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+.verdict .lead {
+    color: var(--accent); font-size: 12px; margin-bottom: 10px;
+    font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.02em;
+}
+.verdict h3 { margin: 0 0 10px; font-size: 21px; }
+.verdict p { color: #c1c7d1; font-size: 14.5px; margin: 0; max-width: 70ch; line-height: 1.65; }
 
 /* ---------- plan list ---------- */
 .plan { counter-reset: s; }
 .plan .item {
-    display: flex; gap: 14px; align-items: flex-start;
-    padding: 12px 0; border-bottom: 1px solid #142638;
+    display: flex; gap: 16px; align-items: flex-start;
+    padding: 13px 0; border-bottom: 1px solid var(--line);
 }
 .plan .item:last-child { border-bottom: none; }
 .plan .item .num {
     font-family: 'IBM Plex Mono', monospace; font-size: 12px;
-    color: var(--cyan); padding-top: 3px; min-width: 22px;
+    color: var(--accent); padding-top: 3px; min-width: 22px;
 }
 .plan .item .body .h { font-size: 15px; font-weight: 500; }
 .plan .item .body .s { color: var(--muted); font-size: 13px; margin-top: 2px; }
@@ -236,27 +269,30 @@ h1, h2, h3, h4 { font-family: 'Space Grotesk', system-ui, sans-serif; letter-spa
     font-family: 'IBM Plex Sans', sans-serif;
     font-weight: 600;
     font-size: 14.5px;
-    border-radius: 10px;
+    border-radius: 7px;
     padding: 11px 20px;
-    border: 1px solid #27466a;
-    background: #10233a;
+    border: 1px solid var(--line-2);
+    background: var(--panel-2);
     color: var(--text);
-    transition: background .15s ease, border-color .15s ease, transform .15s ease;
+    transition: background .15s ease, border-color .15s ease;
 }
 .stButton > button:hover {
-    background: #16304c; border-color: #34618d; color: var(--text);
+    background: #1c2330; border-color: #445069; color: var(--text);
 }
 .stButton > button[kind="primary"] {
-    background: var(--cyan); border-color: var(--cyan); color: #04121d;
+    background: var(--accent); border-color: var(--accent); color: #221403;
 }
 .stButton > button[kind="primary"]:hover {
-    background: #79e1ff; border-color: #79e1ff; color: #04121d;
+    background: #edb35e; border-color: #edb35e; color: #221403;
 }
-.stButton > button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.stButton > button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .stButton > button:disabled { opacity: .4; }
 
-hr { border-color: #142638; }
-.foot { color: #4f6a86; font-size: 12.5px; text-align: center; padding-top: 34px; }
+hr { border-color: var(--line); }
+.foot {
+    color: #565f6e; font-size: 12px; text-align: center; padding-top: 36px;
+    font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.02em;
+}
 
 @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
@@ -276,9 +312,18 @@ st.markdown(CSS, unsafe_allow_html=True)
 stage = st.session_state.stage
 incident_live = 1 <= stage <= 5 and not st.session_state.deployed
 
+GLYPH = (
+    '<svg class="glyph" width="30" height="30" viewBox="0 0 30 30" fill="none">'
+    '<circle cx="15" cy="15" r="13" stroke="#333c4c" stroke-width="1.4"/>'
+    '<path d="M4 15h5l2.4 6.5L15 7l3 12 2-4h6" stroke="#e2a23f" stroke-width="1.6" '
+    'stroke-linecap="round" stroke-linejoin="round" fill="none"/>'
+    '</svg>'
+)
+
 st.markdown(
-    '<div class="masthead"><span class="mark">BOB AI Rescue</span>'
-    '<span class="tag">Software incident command, from detection to verified recovery</span></div>',
+    f'<div class="masthead">{GLYPH}'
+    '<div class="id"><span class="mark">BOB Rescue</span>'
+    '<span class="tag">Incident command, from detection to verified recovery</span></div></div>',
     unsafe_allow_html=True,
 )
 
@@ -353,10 +398,10 @@ elif stage == 1:
     st.markdown(
         '<div class="row hot"><div><div class="name">Payment API returning 503</div>'
         '<div class="desc">Upstream checkout and order services now timing out</div></div>'
-        '<div class="state" style="color:var(--coral)">firing</div></div>'
+        '<div class="state" style="color:var(--bad)">firing</div></div>'
         '<div class="row hot"><div><div class="name">Deploy 8f2c1a landed 00:40 before first error</div>'
         '<div class="desc">Config-only change to payments-svc, no code diff</div></div>'
-        '<div class="state" style="color:var(--amber)">suspect</div></div>',
+        '<div class="state" style="color:var(--warn)">suspect</div></div>',
         unsafe_allow_html=True,
     )
     next_label = "Send in the agents"
@@ -527,7 +572,7 @@ elif stage == 5:
                     '<div class="row hot"><div><div class="name">Rescue rejected</div>'
                     '<div class="desc">Nothing was changed in production. The incident stays '
                     'open and BOB keeps monitoring.</div></div>'
-                    '<div class="state" style="color:var(--coral)">no action taken</div></div>',
+                    '<div class="state" style="color:var(--bad)">no action taken</div></div>',
                     unsafe_allow_html=True,
                 )
             next_label = "Deploy the rescue"
